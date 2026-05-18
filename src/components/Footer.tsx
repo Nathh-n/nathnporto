@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
         
         <div className="text-slate-800 font-bold tracking-widest text-lg">
-          NATH<span className="text-blue-600">.</span>CDR
+          nathh<span className="text-blue-600">.</span>cdr
         </div>
         
         <p className="text-slate-500 text-sm font-medium">
@@ -14,9 +14,9 @@ export default function Footer() {
         </p>
         
         <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
-          <Link href="mailto:emailkamu@gmail.com" className="hover:text-blue-600 transition-colors">Email</Link>
-          <Link href="https://github.com" className="hover:text-blue-600 transition-colors">GitHub</Link>
-          <Link href="https://instagram.com" className="hover:text-blue-600 transition-colors">Instagram</Link>
+          <Link href="mailto:nurfatahillah000@gmail.com" className="hover:text-blue-600 transition-colors">Email</Link>
+          <Link href="https://github.com/Nathh-n" className="hover:text-blue-600 transition-colors">GitHub</Link>
+          <Link href="https://www.instagram.com/nathhcdr/" className="hover:text-blue-600 transition-colors">Instagram</Link>
         </div>
         
       </div>

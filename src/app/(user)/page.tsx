@@ -1,40 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import ProjectList from "@/components/ProjectList";
-import { supabase } from "@/lib/supabase"; // Import Supabase untuk ambil kategori
 
 export default function HomePage() {
   // State form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("");
+  const [service, setService] = useState("Jasa Desain Grafis");
   const [message, setMessage] = useState("");
-  
-  // State untuk menyimpan data kategori dari database
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-
-  // Mengambil kategori saat halaman dimuat
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase.from("categories").select("*");
-      if (data && !error) {
-        setCategories(data);
-        // Otomatis pilih kategori pertama sebagai default jika datanya ada
-        if (data.length > 0) {
-          setService(data[0].name);
-        }
-      }
-    };
-    fetchCategories();
-  }, []);
 
   const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert(`Halo ${name}! Permintaan order untuk layanan "${service}" telah diterima.`);
     setName("");
     setEmail("");
+    setService("Jasa Desain Grafis");
     setMessage("");
   };
 
@@ -145,13 +127,13 @@ export default function HomePage() {
       </section>
 
       {/* =========================================
-          4. REDESAIN: FORM ORDER (SPLIT LAYOUT)
+          4. FORM ORDER SECTION (REDESIGN)
       ========================================= */}
       <section id="contact" className="py-24 bg-white border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
-          {/* Bagian Kiri: Teks & Info Kontak */}
-          <div>
+          {/* Bagian Kiri: Teks & Info Kontak (Bentuk Card) */}
+          <div className="flex flex-col h-full justify-center">
             <span className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-4 block">
               Let's Work Together
             </span>
@@ -163,80 +145,88 @@ export default function HomePage() {
               Saya selalu terbuka untuk mendiskusikan proyek desain grafis, pengembangan website, atau kolaborasi kreatif lainnya. Silakan isi form, dan saya akan merespon secepatnya.
             </p>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center shadow-sm text-2xl border border-slate-100 text-blue-600">✉️</div>
+            {/* Info Kontak dengan desain Card Mini dan Icon SVG */}
+            <div className="space-y-4">
+              {/* Card Email */}
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center gap-5 w-full max-w-md hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                  </svg>
+                </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Email Me</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Me</p>
                   <p className="text-slate-900 font-bold">hello@portofolio.com</p>
                 </div>
               </div>
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center shadow-sm text-2xl border border-slate-100 text-blue-600">📍</div>
+              
+              {/* Card Location */}
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center gap-5 w-full max-w-md hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
+                </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Location</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Location</p>
                   <p className="text-slate-900 font-bold">Indonesia</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bagian Kanan: Form Card */}
-          <div className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/50">
-            <form onSubmit={handleOrderSubmit} className="space-y-5">
+          {/* Bagian Kanan: Form Card (Redesain agar lebih Luwes) */}
+          <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h3 className="text-2xl font-bold text-slate-900 mb-8">Kirim Permintaan Order</h3>
+            
+            <form onSubmit={handleOrderSubmit} className="space-y-6">
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Nama Lengkap</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2.5">
+                  <label className="text-sm font-semibold text-slate-700">Nama Lengkap</label>
                   <input 
                     type="text" 
                     required
                     placeholder="John Doe"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-700 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-medium"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Alamat Email</label>
+                <div className="space-y-2.5">
+                  <label className="text-sm font-semibold text-slate-700">Alamat Email</label>
                   <input 
                     type="email" 
                     required
                     placeholder="email@contoh.com"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-700 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-medium"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Layanan yang Diinginkan</label>
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold text-slate-700">Layanan yang Diinginkan</label>
+                {/* Pilihan Statis Jasa Desain & Coding */}
                 <select 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-bold text-slate-600 cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-700 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-semibold cursor-pointer appearance-none"
                   value={service}
                   onChange={(e) => setService(e.target.value)}
                 >
-                  {/* Mapping data kategori dari database Supabase */}
-                  {categories.length > 0 ? (
-                    categories.map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {cat.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="General Inquiry">General Inquiry</option>
-                  )}
+                  <option value="Jasa Desain Grafis">Jasa Desain Grafis</option>
+                  <option value="Jasa Pembuatan Website / Coding">Jasa Pembuatan Website / Coding</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Detail Singkat Project</label>
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold text-slate-700">Detail Singkat Project</label>
                 <textarea 
                   required
                   rows={4}
                   placeholder="Ceritakan detail proyek yang ingin Anda buat..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium resize-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-700 focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-medium resize-none"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 ></textarea>
@@ -244,7 +234,7 @@ export default function HomePage() {
 
               <button 
                 type="submit"
-                className="w-full bg-blue-600 text-white font-bold text-sm rounded-xl py-4 mt-2 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+                className="w-full bg-blue-600 text-white font-bold text-sm rounded-2xl py-4 mt-4 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/20 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
               >
                 Kirim Permintaan Order
               </button>
