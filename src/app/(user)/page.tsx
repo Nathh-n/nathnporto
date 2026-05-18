@@ -1,26 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProjectList from "@/components/ProjectList";
+import { supabase } from "@/lib/supabase"; // Import Supabase untuk ambil kategori
 
 export default function HomePage() {
-  // State untuk menyimpan inputan form order customer
+  // State form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("Graphic Design");
+  const [service, setService] = useState("");
   const [message, setMessage] = useState("");
+  
+  // State untuk menyimpan data kategori dari database
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+  // Mengambil kategori saat halaman dimuat
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data, error } = await supabase.from("categories").select("*");
+      if (data && !error) {
+        setCategories(data);
+        // Otomatis pilih kategori pertama sebagai default jika datanya ada
+        if (data.length > 0) {
+          setService(data[0].name);
+        }
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Logika pop-up sementara sebelum kita hubungkan ke tabel Supabase
-    alert(`Halo ${name}! Permintaan order untuk proyek "${service}" telah diterima. Keterangan lengkap akan segera kami proses.`);
-    
-    // Reset form setelah sukses submit
+    alert(`Halo ${name}! Permintaan order untuk layanan "${service}" telah diterima.`);
     setName("");
     setEmail("");
-    setService("Graphic Design");
     setMessage("");
   };
 
@@ -32,7 +46,6 @@ export default function HomePage() {
       ========================================= */}
       <section className="min-h-[calc(100vh-6rem)] flex flex-col justify-center py-12 relative">
         <div className="max-w-6xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-          
           <div className="flex flex-col items-start text-left order-2 lg:order-1">
             <span className="text-blue-600 font-semibold tracking-wider uppercase text-sm mb-4">
               Welcome to my creative space
@@ -70,11 +83,10 @@ export default function HomePage() {
       </section>
 
       {/* =========================================
-          2. ABOUT ME & SKILLS (2 KARTU BERDAMPINGAN) 
+          2. ABOUT ME & SKILLS 
       ========================================= */}
       <section id="about" className="py-24 bg-white border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-6">
-          
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-6 block">
               Behind the Code & Canvas
@@ -88,47 +100,38 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            
             <div className="p-8 md:p-10 rounded-[2rem] bg-slate-50 border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-3xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform">
-                🎨
-              </div>
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-3xl mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform">🎨</div>
               <h3 className="text-2xl font-bold text-slate-900 mb-3">Graphic & UI Design</h3>
               <p className="text-slate-600 text-base leading-relaxed mb-8 flex-grow">
-                Merancang identitas visual, aset digital, dan tata letak yang menarik serta komunikatif untuk berbagai kebutuhan media.
+                Merancang identitas visual, aset digital, dan tata letak yang menarik serta komunikatif.
               </p>
               <div className="flex flex-wrap gap-2 mt-auto">
                 <span className="px-3 py-1.5 bg-white text-slate-700 text-sm font-bold rounded-lg border border-slate-200 shadow-sm">CorelDRAW</span>
-                <span className="px-3 py-1.5 bg-white text-slate-700 text-sm font-bold rounded-lg border border-slate-200 shadow-sm">Layouting</span>
                 <span className="px-3 py-1.5 bg-white text-slate-700 text-sm font-bold rounded-lg border border-slate-200 shadow-sm">UI Design</span>
               </div>
             </div>
 
             <div className="p-8 md:p-10 rounded-[2rem] bg-blue-50 border border-blue-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-3xl text-blue-600 mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform">
-                💻
-              </div>
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-3xl text-blue-600 mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-transform">💻</div>
               <h3 className="text-2xl font-bold text-slate-900 mb-3">Web Development</h3>
               <p className="text-slate-600 text-base leading-relaxed mb-8 flex-grow">
-                Membangun aplikasi web full-stack modern dengan performa tinggi, interaktif, dan terintegrasi dengan database.
+                Membangun aplikasi web full-stack modern dengan performa tinggi dan dinamis.
               </p>
               <div className="flex flex-wrap gap-2 mt-auto">
-                <span className="px-3 py-1.5 bg-white text-blue-700 text-sm font-bold rounded-lg border border-blue-200 shadow-sm">Laravel & Livewire</span>
-                <span className="px-3 py-1.5 bg-white text-blue-700 text-sm font-bold rounded-lg border border-blue-200 shadow-sm">Next.js</span>
+                <span className="px-3 py-1.5 bg-white text-blue-700 text-sm font-bold rounded-lg border border-blue-200 shadow-sm">Laravel & Next.js</span>
                 <span className="px-3 py-1.5 bg-white text-blue-700 text-sm font-bold rounded-lg border border-blue-200 shadow-sm">Supabase</span>
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
       {/* =========================================
-          3. PROJECTS GALLERY (DENGAN FILTER KATEGORI)
+          3. PROJECTS GALLERY
       ========================================= */}
       <section id="projects" className="py-24 bg-slate-50 border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-6">
-          
           <div className="text-center mb-16">
             <span className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-4 block">
               My Portfolio
@@ -137,42 +140,59 @@ export default function HomePage() {
               Karya Terbaru Saya
             </h2>
           </div>
-          
           <ProjectList />
-
         </div>
       </section>
 
       {/* =========================================
-          4. FORM ORDER SECTION (BARU)
+          4. REDESAIN: FORM ORDER (SPLIT LAYOUT)
       ========================================= */}
       <section id="contact" className="py-24 bg-white border-t border-slate-100">
-        <div className="max-w-4xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
-          <div className="text-center mb-12">
+          {/* Bagian Kiri: Teks & Info Kontak */}
+          <div>
             <span className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-4 block">
-              Get In Touch
+              Let's Work Together
             </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">
-              Mulai Project Anda
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+              Punya ide menarik? <br />
+              Mari kita diskusikan.
             </h2>
-            <p className="text-slate-600 max-w-md mx-auto text-sm md:text-base">
-              Punya ide luar biasa untuk desain grafis atau sistem web? Isi formulir di bawah ini untuk mengajukan order penawaran proyek.
+            <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-lg">
+              Saya selalu terbuka untuk mendiskusikan proyek desain grafis, pengembangan website, atau kolaborasi kreatif lainnya. Silakan isi form, dan saya akan merespon secepatnya.
             </p>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center shadow-sm text-2xl border border-slate-100 text-blue-600">✉️</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Email Me</p>
+                  <p className="text-slate-900 font-bold">hello@portofolio.com</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center shadow-sm text-2xl border border-slate-100 text-blue-600">📍</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Location</p>
+                  <p className="text-slate-900 font-bold">Indonesia</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Form Card */}
-          <div className="bg-slate-50 p-8 md:p-10 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/30">
-            <form onSubmit={handleOrderSubmit} className="space-y-6">
+          {/* Bagian Kanan: Form Card */}
+          <div className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/50">
+            <form onSubmit={handleOrderSubmit} className="space-y-5">
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Nama Lengkap</label>
                   <input 
                     type="text" 
                     required
-                    placeholder="Masukkan nama Anda"
-                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium shadow-sm"
+                    placeholder="John Doe"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -183,7 +203,7 @@ export default function HomePage() {
                     type="email" 
                     required
                     placeholder="email@contoh.com"
-                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium shadow-sm"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -193,13 +213,20 @@ export default function HomePage() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Layanan yang Diinginkan</label>
                 <select 
-                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-bold text-slate-600 shadow-sm cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-bold text-slate-600 cursor-pointer"
                   value={service}
                   onChange={(e) => setService(e.target.value)}
                 >
-                  <option value="Graphic Design">Graphic & UI Design (CorelDRAW)</option>
-                  <option value="Web Development">Web Development (Laravel / Next.js)</option>
-                  <option value="Full Package">Desain + Web Coding (Paket Lengkap)</option>
+                  {/* Mapping data kategori dari database Supabase */}
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="General Inquiry">General Inquiry</option>
+                  )}
                 </select>
               </div>
 
@@ -208,8 +235,8 @@ export default function HomePage() {
                 <textarea 
                   required
                   rows={4}
-                  placeholder="Ceritakan detail kebutuhan visual desain atau fitur web sistem yang ingin Anda buat..."
-                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium resize-none shadow-sm"
+                  placeholder="Ceritakan detail proyek yang ingin Anda buat..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all text-sm font-medium resize-none"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 ></textarea>
@@ -217,7 +244,7 @@ export default function HomePage() {
 
               <button 
                 type="submit"
-                className="w-full bg-blue-600 text-white font-bold text-sm rounded-xl py-4 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+                className="w-full bg-blue-600 text-white font-bold text-sm rounded-xl py-4 mt-2 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
               >
                 Kirim Permintaan Order
               </button>
