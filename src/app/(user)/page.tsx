@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import ProjectList from "@/components/ProjectList";
 
 export default function HomePage() {
@@ -52,8 +53,15 @@ export default function HomePage() {
           <div className="flex justify-center lg:justify-end order-1 lg:order-2">
             <div className="relative w-72 h-72 md:w-96 md:h-96">
               <div className="absolute inset-0 bg-blue-200 rounded-full blur-3xl opacity-60 transform translate-x-4 translate-y-4"></div>
-              <div className="relative w-full h-full bg-white rounded-[2rem] border-8 border-white shadow-xl overflow-hidden rotate-3 hover:rotate-0 transition-transform duration-500 flex items-center justify-center text-slate-400 font-medium">
-                [ Tempat Foto Kamu ]
+              <div className="relative w-full h-full bg-white rounded-[2rem] border-8 border-white shadow-xl overflow-hidden rotate-3 hover:rotate-0 transition-transform duration-500">
+                <Image
+                  src="/fotoprofile.png"
+                  alt="Foto Profil"
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </div>
               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -156,7 +164,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Me</p>
-                  <p className="text-slate-900 font-bold">hello@portofolio.com</p>
+                  <p className="text-slate-900 font-bold">nurfatahillah000@gmail.com</p>
                 </div>
               </div>
               
