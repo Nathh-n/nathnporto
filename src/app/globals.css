@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    /* Geser tepat separuh konten agar perulangannya (loop) terlihat sangat mulus */
+    transform: translateX(-20%);
+  }
+}
+
+.animate-marquee-custom {
+  display: flex;
+  width: max-content;
+  animation: marquee 20s linear infinite;
+}
