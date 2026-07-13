@@ -1,28 +1,72 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
-  // Simulasi data statistik dari Supabase (nanti akan diganti dengan fungsi fetch/count)
+  // State untuk menyimpan jumlah data yang asli
+  const [counts, setCounts] = useState({ design: 0, coding: 0, tools: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [greeting, setGreeting] = useState("Welcome");
+
+  useEffect(() => {
+    // 1. Atur sapaan berdasarkan waktu lokal
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Selamat Pagi");
+    else if (hour < 15) setGreeting("Selamat Siang");
+    else if (hour < 18) setGreeting("Selamat Sore");
+    else setGreeting("Selamat Malam");
+
+    // 2. Fungsi untuk menarik perhitungan dari Supabase
+    const fetchStats = async () => {
+      try {
+        // Menggunakan Promise.all agar 3 pencarian berjalan berbarengan (jauh lebih cepat)
+        // Opsi { count: "exact", head: true } hanya meminta angkanya saja, tanpa menarik isi datanya
+        const [
+          { count: designCount }, 
+          { count: codingCount }, 
+          { count: toolsCount }
+        ] = await Promise.all([
+          supabase.from("design_projects").select("*", { count: "exact", head: true }),
+          supabase.from("coding_projects").select("*", { count: "exact", head: true }),
+          supabase.from("tools").select("*", { count: "exact", head: true })
+        ]);
+
+        setCounts({
+          design: designCount || 0,
+          coding: codingCount || 0,
+          tools: toolsCount || 0
+        });
+      } catch (error) {
+        console.error("Gagal mengambil data statistik:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const stats = [
     { 
       id: 1, 
       title: "Design Projects", 
-      count: 5, 
+      count: counts.design, 
       color: "from-blue-500 to-cyan-400",
       icon: <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
     },
     { 
       id: 2, 
       title: "Coding Projects", 
-      count: 3, 
+      count: counts.coding, 
       color: "from-indigo-500 to-blue-500",
       icon: <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
     },
     { 
       id: 3, 
       title: "Tools & Skills", 
-      count: 6, 
+      count: counts.tools, 
       color: "from-[#283870] to-[#62A8F9]",
       icon: <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
     },
@@ -48,6 +92,9 @@ export default function AdminDashboard() {
         transition={{ duration: 0.5 }}
         className="mb-10"
       >
+        <div className="inline-block bg-[#E1EAFB] text-[#283870] px-4 py-1.5 rounded-full text-sm font-extrabold mb-3">
+          {greeting}, Admin 👋
+        </div>
         <h1 className="text-4xl font-extrabold text-[#283870] mb-2">Welcome to Command Center</h1>
         <p className="text-gray-500 font-medium text-lg">
           Kelola data portofoliomu agar selalu up-to-date untuk kebutuhan melamar kerja atau pameran karya.
@@ -56,7 +103,7 @@ export default function AdminDashboard() {
 
       {/* Stats Cards */}
       <motion.div 
-        variants={containerVariants as any} /* <--- Tambahkan as any di sini */
+        variants={containerVariants as any}
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
@@ -64,15 +111,20 @@ export default function AdminDashboard() {
         {stats.map((stat) => (
           <motion.div 
             key={stat.id}
-            variants={itemVariants as any} /* <--- Tambahkan as any di sini juga */
+            variants={itemVariants as any}
             className={`bg-gradient-to-br ${stat.color} rounded-3xl p-6 shadow-lg text-white relative overflow-hidden`}
           >
             <div className="relative z-10 flex justify-between items-start">
               <div>
                 <p className="text-white/80 font-semibold mb-1">{stat.title}</p>
-                <h3 className="text-5xl font-extrabold">{stat.count}</h3>
+                {/* Tampilkan animasi loading jika data masih diambil, jika selesai tampilkan angka */}
+                {isLoading ? (
+                  <div className="h-12 w-20 bg-white/20 rounded-lg animate-pulse mt-1"></div>
+                ) : (
+                  <h3 className="text-5xl font-extrabold">{stat.count}</h3>
+                )}
               </div>
-              <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
+              <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm shadow-inner">
                 {stat.icon}
               </div>
             </div>
@@ -88,7 +140,9 @@ export default function AdminDashboard() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        <h2 className="text-2xl font-extrabold text-[#283870] mb-6">Quick Actions</h2>
+        <h2 className="text-2xl font-extrabold text-[#283870] mb-6 flex items-center gap-2">
+          Quick Actions
+        </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
@@ -98,7 +152,7 @@ export default function AdminDashboard() {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Update Design</h3>
-            <p className="text-gray-500 text-sm font-medium">Ubah 5 gambar thumbnail yang muncul saat folder di halaman utama di-hover.</p>
+            <p className="text-gray-500 text-sm font-medium">Ubah gambar thumbnail yang muncul saat folder di halaman utama di-hover.</p>
           </Link>
 
           {/* Card Shortcut 2 */}
