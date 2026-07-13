@@ -23,6 +23,8 @@ export default function UserHomePage() {
 
   const jobdesk = ["Designer Graphic", "UI/UX Designer", "Front End Developer", "Back End Developer"];
 
+
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   // --- STATE UNTUK FORM KONTAK ---
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +47,7 @@ export default function UserHomePage() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: "a936b0d4-521f-41c6-8f6e-f979881747cb", // <--- GANTI INI
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_KEY, // <--- GANTI INI
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
@@ -192,15 +194,33 @@ export default function UserHomePage() {
 
         {/* --- DESIGN PROJECTS --- */}
         <div className="relative z-10 flex flex-col items-center mt-4 md:mt-8">
-          <h2 className="text-4xl font-extrabold text-[#283870] mb-16 md:mb-24">Design Projects</h2>
+          <h2 className="text-4xl font-extrabold text-[#283870] mb-8 md:mb-24">Design Projects</h2>
+          
+          {/* TOMBOL PREVIEW KHUSUS MOBILE (Sembunyi di Desktop) */}
+          <button 
+            onClick={() => setIsMobilePreviewOpen(!isMobilePreviewOpen)}
+            className="md:hidden mb-12 bg-white/80 backdrop-blur-sm text-[#4882F0] border-2 border-[#4882F0] font-bold py-3 px-8 rounded-full shadow-lg transition-all active:scale-95 z-20 flex items-center gap-2"
+          >
+            {isMobilePreviewOpen ? "Tutup Preview" : "Lihat Preview Desain"}
+            <svg className={`w-5 h-5 transition-transform ${isMobilePreviewOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+
+          {/* AREA FOLDER (Dibungkus Link agar saat diklik/tap langsung ke /work) */}
           <Link href="/work" className="relative flex flex-col items-center cursor-pointer group">
-            <motion.div className="relative w-64 h-64 md:w-80 md:h-80 flex items-end justify-center" initial="rest" whileHover="hover" whileTap="hover">
+            
+            {/* Logika Animasi: Gabungan Hover Desktop & State Mobile */}
+            <motion.div 
+              className="relative w-64 h-64 md:w-80 md:h-80 flex items-end justify-center" 
+              initial="rest" 
+              whileHover="hover" 
+              animate={isMobilePreviewOpen ? "hover" : "rest"}
+            >
               {designThumbnails.map((item, index) => {
                 const spreadVariants = {
                   rest: { opacity: 0, y: 0, x: 0, rotate: 0, scale: 0.3 },
                   hover: {
                     opacity: 1,
-                    y: [ -40, -120, -150, -120, -40 ][index] || -100, // Fallback jika lebih dari 5
+                    y: [ -40, -120, -150, -120, -40 ][index] || -100, 
                     x: [ -130, -70, 0, 70, 130 ][index] || 0,
                     rotate: [ -25, -12, 0, 12, 25 ][index] || 0,
                     scale: 1,
@@ -210,7 +230,6 @@ export default function UserHomePage() {
 
                 return (
                   <motion.div key={item.id} variants={spreadVariants as any} className="absolute top-10 w-32 h-44 md:w-40 md:h-52 rounded-xl shadow-2xl border-[3px] border-white overflow-hidden z-0 bg-gray-200">
-                    {/* Menggunakan image_url dari Supabase */}
                     <Image src={item.image_url} alt={item.title || `Design ${index + 1}`} fill className="object-cover" sizes="(max-width: 768px) 150px, 200px" />
                   </motion.div>
                 );
@@ -219,9 +238,11 @@ export default function UserHomePage() {
                 <Image src="/folder3d.png" alt="Design Projects Folder" fill className="object-contain" sizes="(max-width: 768px) 224px, 288px" />
               </motion.div>
             </motion.div>
+            
             <span className="mt-8 text-white text-sm font-semibold tracking-wide animate-pulse md:hidden bg-blue-900/20 py-2 px-6 rounded-full border border-white/20">
-              Ketuk untuk melihat karya desain
+              Ketuk folder untuk menuju galeri utama
             </span>
+
           </Link>
         </div>
 
