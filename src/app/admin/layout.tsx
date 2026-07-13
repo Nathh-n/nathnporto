@@ -23,14 +23,21 @@ export default function AdminLayout({
       
       // Jika TIDAK ADA session (belum login) dan mencoba masuk halaman selain login -> Tendang ke Login
       if (!data.session && !isLoginPage) {
-        router.push("/admin/login");
+        // Gunakan replace agar user tidak bisa klik tombol "Back" ke dashboard
+        router.replace("/admin/login"); 
+        // JANGAN setIsChecking(false) di sini. Biarkan tetap true (loading) 
+        // sampai halamannya benar-benar pindah ke /admin/login.
       } 
       // Jika SUDAH ADA session (sudah login) dan mencoba masuk halaman login -> Arahkan ke Dashboard
       else if (data.session && isLoginPage) {
-        router.push("/admin");
+        router.replace("/admin/coding-projects"); // Sesuaikan jika halaman utamanya berbeda
+        // JANGAN setIsChecking(false) di sini.
       }
-      
-      setIsChecking(false);
+      // Jika posisinya SUDAH BENAR (Sudah login di admin, ATAU belum login di halaman login)
+      else {
+        // BARU matikan loadingnya agar konten dirender
+        setIsChecking(false);
+      }
     };
 
     checkUser();
@@ -39,16 +46,20 @@ export default function AdminLayout({
   // Layar loading sementara saat mengecek keamanan
   if (isChecking) {
     return (
-      <html lang="en">
+      <html lang="id">
         <body className="flex h-screen items-center justify-center bg-[#F4F7FE]">
-          <div className="animate-pulse text-xl font-bold text-blue-500">Memverifikasi Keamanan...</div>
+          {/* Animasi loading yang lebih elegan */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#3B5BDB]"></div>
+            <div className="animate-pulse text-lg font-bold text-[#3B5BDB]">Memverifikasi Sesi...</div>
+          </div>
         </body>
       </html>
     );
   }
 
   return (
-    <html lang="en">
+    <html lang="id">
       <body>
         {/* Jika di halaman login, JANGAN tampilkan Sidebar */}
         {isLoginPage ? (
