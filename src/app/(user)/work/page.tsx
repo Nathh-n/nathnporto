@@ -101,7 +101,11 @@ export default function WorkPage() {
                   <div className="col-span-full text-center py-20 text-gray-400 font-medium">Belum ada karya desain.</div>
                 ) : (
                   designProjects.map((project) => (
-                    <div key={project.id} className="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100">
+                    <Link 
+                      href={`/work/${project.id}`} 
+                      key={project.id} 
+                      className="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100 cursor-pointer hover:-translate-y-2"
+                    >
                       <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
                         {project.image_url ? (
                           <Image 
@@ -121,7 +125,7 @@ export default function WorkPage() {
                         )}
                       </div>
                       <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="font-extrabold text-gray-800 text-lg mb-2">{project.title || "Tanpa Judul"}</h3>
+                        <h3 className="font-extrabold text-gray-800 text-lg mb-2 group-hover:text-blue-600 transition-colors">{project.title || "Tanpa Judul"}</h3>
                         {project.tools_used && (
                           <span className="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full mb-3 self-start">
                             {project.tools_used}
@@ -131,7 +135,7 @@ export default function WorkPage() {
                           {project.description || "Tidak ada deskripsi."}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 )}
               </motion.div>
