@@ -8,8 +8,8 @@ import { supabase } from "@/lib/supabase"; // Import Supabase
 export default function UserHomePage() {
   const [photos, setPhotos] = useState([
     "/fotoprofile.png", 
-    "/foto2.jpg", 
-    "/foto3.jpg", 
+    "/foto2baru.jpg", 
+    "/foto3baru.jpg", 
   ]);
 
   const handlePhotoClick = () => {
