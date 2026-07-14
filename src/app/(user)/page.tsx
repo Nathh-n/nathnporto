@@ -339,8 +339,8 @@ export default function UserHomePage() {
           {/* Kiri: Informasi Kontak */}
           <div className="w-full md:w-1/2 bg-gradient-to-br from-[#87BAF9] to-[#9CBDF7] rounded-[32px] p-10 text-white shadow-xl">
             <h3 className="text-3xl font-extrabold mb-4">Contact</h3>
-            <p className="font-semibold mb-1">Phone: <span className="font-normal block mt-1">+62 812-3456-7890</span></p>
-            <p className="font-semibold mb-10">Email: <span className="font-normal block mt-1">hello@nath.com</span></p>
+            <p className="font-semibold mb-1">Phone: <span className="font-normal block mt-1">081215302203</span></p>
+            <p className="font-semibold mb-10">Email: <span className="font-normal block mt-1">nurfatahillah000@gmail.com</span></p>
             
             <h3 className="text-3xl font-extrabold mb-4">Open Time</h3>
             <p className="font-semibold mb-12">Always</p>
