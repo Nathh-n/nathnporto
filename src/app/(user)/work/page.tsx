@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase";
 
 export default function WorkPage() {
   const [activeTab, setActiveTab] = useState<"design" | "coding">("design");
-  const [designProjects, setDesignProjects] = useState<any[]>([]);
+  // State untuk menyimpan desain yang sudah dikelompokkan
+  const [groupedDesigns, setGroupedDesigns] = useState<Record<string, any[]>>({});
   const [codingProjects, setCodingProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,15 +16,29 @@ export default function WorkPage() {
     const fetchAllWorks = async () => {
       setIsLoading(true);
       
-      // 1. Tarik SEMUA data Desain
+      // 1. Tarik data Desain (Mengambil nama kategori dari relasi tabel categories)
       const { data: designs } = await supabase
         .from("design_projects")
-        .select("*")
+        // Asumsi: relasi bernama categories, dan kita ambil kolom 'name'
+        .select("*, categories(name)") 
         .order("created_at", { ascending: false });
       
-      if (designs) setDesignProjects(designs);
+      if (designs) {
+        // Logika Pengelompokan (Grouping) berdasarkan kategori
+        const grouped = designs.reduce((acc, curr) => {
+          // Jika tidak ada kategori, masukkan ke "Lainnya"
+          const categoryName = curr.categories?.name || "Lainnya";
+          if (!acc[categoryName]) {
+            acc[categoryName] = [];
+          }
+          acc[categoryName].push(curr);
+          return acc;
+        }, {} as Record<string, any[]>);
+        
+        setGroupedDesigns(grouped);
+      }
 
-      // 2. Tarik SEMUA data Coding
+      // 2. Tarik data Coding
       const { data: codes } = await supabase
         .from("coding_projects")
         .select("*")
@@ -36,6 +51,9 @@ export default function WorkPage() {
 
     fetchAllWorks();
   }, []);
+
+  // Hitung total desain dari semua grup
+  const totalDesignCount = Object.values(groupedDesigns).reduce((acc, curr) => acc + curr.length, 0);
 
   return (
     <main className="min-h-screen bg-[#F4F7FE] pb-24">
@@ -62,7 +80,7 @@ export default function WorkPage() {
                 : "bg-transparent text-gray-500 hover:bg-gray-100"
             }`}
           >
-            Design Gallery ({designProjects.length})
+            Design Gallery ({totalDesignCount})
           </button>
           <button
             onClick={() => setActiveTab("coding")}
@@ -78,16 +96,16 @@ export default function WorkPage() {
       </div>
 
       {/* CONTENT SECTION */}
-      <section className="max-w-6xl mx-auto px-6 mt-16 min-h-[400px]">
+      <section className="max-w-7xl mx-auto px-6 mt-16 min-h-[400px]">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-blue-500 gap-4">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
-            <p className="font-bold animate-pulse">Memuat karya...</p>
+          <div className="flex flex-col items-center justify-center py-20 text-[#4882F0] gap-4">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-[#4882F0] rounded-full animate-spin"></div>
+            <p className="font-bold animate-pulse">Menyusun mahakarya...</p>
           </div>
         ) : (
           <AnimatePresence mode="wait">
             
-            {/* --- TAB DESAIN --- */}
+            {/* --- TAB DESAIN (Dengan Kategori Horizontal Scroll) --- */}
             {activeTab === "design" && (
               <motion.div
                 key="design"
@@ -95,53 +113,65 @@ export default function WorkPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                className="flex flex-col gap-12"
               >
-                {designProjects.length === 0 ? (
-                  <div className="col-span-full text-center py-20 text-gray-400 font-medium">Belum ada karya desain.</div>
+                {Object.keys(groupedDesigns).length === 0 ? (
+                  <div className="text-center py-20 text-gray-400 font-medium">Belum ada karya desain.</div>
                 ) : (
-                  designProjects.map((project) => (
-                    <Link 
-                      href={`/work/${project.id}`} 
-                      key={project.id} 
-                      className="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group border border-gray-100 cursor-pointer hover:-translate-y-2"
-                    >
-                      <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
-                        {project.image_url ? (
-                          <Image 
-                            src={project.image_url} 
-                            alt={project.title || "Design"} 
-                            fill 
-                            className="object-cover group-hover:scale-110 transition-transform duration-700" 
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
-                        )}
-                        {project.is_featured && (
-                          <div className="absolute top-3 left-3 z-10 bg-orange-500 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg shadow-md">
-                            ⭐ HIGHLIGHT
-                          </div>
-                        )}
+                  Object.entries(groupedDesigns).map(([category, projects]) => (
+                    <div key={category} className="flex flex-col">
+                      <h2 className="text-3xl font-extrabold text-[#283870] mb-6 pl-2 border-l-4 border-[#4882F0]">
+                        {category}
+                      </h2>
+                      
+                      {/* Container Horizontal Scroll */}
+                      <div className="flex overflow-x-auto gap-6 pb-8 pt-2 snap-x snap-mandatory hide-scrollbar pr-6">
+                        {projects.map((project) => (
+                          <Link 
+                            href={`/work/${project.id}`} 
+                            key={project.id} 
+                            // Ukuran lebar card dibuat tetap (min-w) agar bisa digeser
+                            className="min-w-[280px] md:min-w-[320px] max-w-[320px] bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group border border-gray-100 cursor-pointer hover:-translate-y-2 snap-start"
+                          >
+                            <div className="relative w-full h-60 bg-gray-100 overflow-hidden rounded-t-3xl">
+                              {project.image_url ? (
+                                <Image 
+                                  src={project.image_url} 
+                                  alt={project.title || "Design"} 
+                                  fill 
+                                  className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                                  sizes="(max-width: 768px) 100vw, 320px"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                              )}
+                              {project.is_featured && (
+                                <div className="absolute top-3 left-3 z-10 bg-orange-500 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg shadow-md">
+                                  ⭐ HIGHLIGHT
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-5 flex-1 flex flex-col">
+                              <h3 className="font-extrabold text-gray-800 text-lg mb-2 group-hover:text-blue-600 transition-colors truncate">{project.title || "Tanpa Judul"}</h3>
+                              {project.tools_used && (
+                                <span className="inline-block bg-[#E1EAFB] text-[#283870] text-[10px] font-bold px-3 py-1.5 rounded-full mb-3 self-start">
+                                  {project.tools_used}
+                                </span>
+                              )}
+                              <p className="text-gray-500 text-sm font-medium line-clamp-2 mt-auto">
+                                {project.description || "Tidak ada deskripsi."}
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="font-extrabold text-gray-800 text-lg mb-2 group-hover:text-blue-600 transition-colors">{project.title || "Tanpa Judul"}</h3>
-                        {project.tools_used && (
-                          <span className="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full mb-3 self-start">
-                            {project.tools_used}
-                          </span>
-                        )}
-                        <p className="text-gray-500 text-sm font-medium line-clamp-3 mt-auto">
-                          {project.description || "Tidak ada deskripsi."}
-                        </p>
-                      </div>
-                    </Link>
+                    </div>
                   ))
                 )}
               </motion.div>
             )}
 
-            {/* --- TAB CODING --- */}
+            {/* --- TAB CODING (Tetap menggunakan Grid biasa) --- */}
             {activeTab === "coding" && (
               <motion.div
                 key="coding"
@@ -151,6 +181,7 @@ export default function WorkPage() {
                 transition={{ duration: 0.3 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
+                {/* ... Kode mapping codingProjects tetap sama seperti sebelumnya ... */}
                 {codingProjects.length === 0 ? (
                   <div className="col-span-full text-center py-20 text-gray-400 font-medium">Belum ada proyek coding.</div>
                 ) : (
@@ -187,18 +218,15 @@ export default function WorkPage() {
                 )}
               </motion.div>
             )}
-
           </AnimatePresence>
         )}
       </section>
 
-      {/* Tombol Kembali ke Homepage */}
       <div className="max-w-6xl mx-auto px-6 mt-16 text-center">
         <Link href="/" className="inline-block text-gray-400 hover:text-[#4882F0] font-bold transition-colors">
           ← Kembali ke Halaman Utama
         </Link>
       </div>
-
     </main>
   );
 }
